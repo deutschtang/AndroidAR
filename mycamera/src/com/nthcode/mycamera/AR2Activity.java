@@ -3,6 +3,13 @@ package com.nthcode.mycamera;
 import android.app.Activity;
 import android.os.Bundle;
 import android.hardware.Camera;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -14,12 +21,41 @@ public class AR2Activity extends Activity
     Camera camera;
     boolean inPreview;
 
+    final static String TAG = "PAAR";
+
+    SensorManager sensorManager;
+
+    int orientationSensor;
+    float headingAngle;
+    float pitchAngle;
+    float rollAngle;
+
+    int accelerometerSensor;
+    float xAxis;
+    float yAxis;
+    float zAxis;
+
+    LocationManager locationManager;
+    double latitude;
+    double longitude;
+    double altitude;
+
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 2, locationListener);
+
+        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        orientationSensor = Sensor.TYPE_ORIENTATION;
+        accelerometerSensor = Sensor.TYPE_ACCELEROMETER;
+        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(orientationSensor), SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(accelerometerSensor), SensorManager.SENSOR_DELAY_NORMAL);
 
         inPreview = false;
 
@@ -29,9 +65,65 @@ public class AR2Activity extends Activity
         previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
+    LocationListener locationListener = new LocationListener() {
+        public void onLocationChanged(Location location) {
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+            altitude = location.getAltitude();
+
+            Log.d(TAG, "Latitude: " + String.valueOf(latitude));
+            Log.d(TAG, "Longitude: " + String.valueOf(longitude));
+            Log.d(TAG, "Altitude: " + String.valueOf(altitude));
+        }
+
+        public void onProviderDisabled(String arg0) {
+        }
+
+        public void onProviderEnabled(String arg0) {
+        }
+
+        public void onStatusChanged(String arg0, int arg1, Bundle arg2)
+        {
+        }
+    };
+
+    final SensorEventListener sensorEventListener = new SensorEventListener() {
+        public void onSensorChanged(SensorEvent sensorEvent) {
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION)
+            {
+                headingAngle = sensorEvent.values[0];
+                pitchAngle = sensorEvent.values[1];
+                rollAngle = sensorEvent.values[2];
+
+                Log.d(TAG, "Heading: " + String.valueOf(headingAngle));
+                Log.d(TAG, "Pitch: " + String.valueOf(pitchAngle));
+                Log.d(TAG, "Roll: " + String.valueOf(rollAngle));
+            }
+            else if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+            {
+                xAxis = sensorEvent.values[0];
+                yAxis = sensorEvent.values[1];
+                zAxis = sensorEvent.values[2];
+
+                Log.d(TAG, "X Axis: " + String.valueOf(xAxis));
+                Log.d(TAG, "Y Axis: " + String.valueOf(yAxis));
+                Log.d(TAG, "Z Axis: " + String.valueOf(zAxis));
+            }
+        }
+
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+
+    };
+
     public void onResume()
     {
         super.onResume();
+
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 2, locationListener);
+
+        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(orientationSensor), SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(accelerometerSensor), SensorManager.SENSOR_DELAY_NORMAL);
 
         camera = Camera.open();
     }
@@ -42,6 +134,9 @@ public class AR2Activity extends Activity
         {
             camera.stopPreview();
         }
+
+        locationManager.removeUpdates(locationListener);
+        sensorManager.unregisterListener(sensorEventListener);
 
         camera.release();
         camera = null;
