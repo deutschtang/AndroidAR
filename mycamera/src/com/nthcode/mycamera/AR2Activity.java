@@ -10,6 +10,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.widget.TextView;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -41,6 +42,18 @@ public class AR2Activity extends Activity
     double altitude;
 
 
+    TextView xAxisValue;
+    TextView yAxisValue;
+    TextView zAxisValue;
+
+    TextView headingValue;
+    TextView pitchValue;
+    TextView rollValue;
+
+    TextView altitudeValue;
+    TextView latitudeValue;
+    TextView longitudeValue;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -56,6 +69,16 @@ public class AR2Activity extends Activity
         accelerometerSensor = Sensor.TYPE_ACCELEROMETER;
         sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(orientationSensor), SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(accelerometerSensor), SensorManager.SENSOR_DELAY_NORMAL);
+
+        xAxisValue = (TextView) findViewById(R.id.xAxisValue);
+        yAxisValue = (TextView) findViewById(R.id.yAxisValue);
+        zAxisValue = (TextView) findViewById(R.id.zAxisValue);
+        headingValue = (TextView) findViewById(R.id.headingValue);
+        pitchValue = (TextView) findViewById(R.id.pitchValue);
+        rollValue = (TextView) findViewById(R.id.rollValue);
+        altitudeValue = (TextView) findViewById(R.id.altitudeValue);
+        longitudeValue = (TextView) findViewById(R.id.longitudeValue);
+        latitudeValue = (TextView) findViewById(R.id.latitudeValue);
 
         inPreview = false;
 
@@ -74,6 +97,10 @@ public class AR2Activity extends Activity
             Log.d(TAG, "Latitude: " + String.valueOf(latitude));
             Log.d(TAG, "Longitude: " + String.valueOf(longitude));
             Log.d(TAG, "Altitude: " + String.valueOf(altitude));
+
+            latitudeValue.setText(String.valueOf(latitude));
+            longitudeValue.setText(String.valueOf(longitude));
+            altitudeValue.setText(String.valueOf(altitude));
         }
 
         public void onProviderDisabled(String arg0) {
@@ -98,6 +125,10 @@ public class AR2Activity extends Activity
                 Log.d(TAG, "Heading: " + String.valueOf(headingAngle));
                 Log.d(TAG, "Pitch: " + String.valueOf(pitchAngle));
                 Log.d(TAG, "Roll: " + String.valueOf(rollAngle));
+
+                headingValue.setText(String.valueOf(headingAngle));
+                pitchValue.setText(String.valueOf(pitchAngle));
+                rollValue.setText(String.valueOf(rollAngle));
             }
             else if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
             {
@@ -108,6 +139,10 @@ public class AR2Activity extends Activity
                 Log.d(TAG, "X Axis: " + String.valueOf(xAxis));
                 Log.d(TAG, "Y Axis: " + String.valueOf(yAxis));
                 Log.d(TAG, "Z Axis: " + String.valueOf(zAxis));
+
+                xAxisValue.setText(String.valueOf(xAxis));
+                yAxisValue.setText(String.valueOf(yAxis));
+                zAxisValue.setText(String.valueOf(zAxis));
             }
         }
 
