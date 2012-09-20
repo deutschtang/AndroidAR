@@ -62,7 +62,16 @@ public class AR2Activity extends Activity
         setContentView(R.layout.main);
 
         locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 2, locationListener);
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        {
+            Log.d(TAG, "Start GPS Provider!");
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 2, locationListener);
+        }
+        else
+        {
+            Log.d(TAG, "Start WIFI Provider!");
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 0, locationListener);
+        }
 
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         orientationSensor = Sensor.TYPE_ORIENTATION;
@@ -122,9 +131,9 @@ public class AR2Activity extends Activity
                 pitchAngle = sensorEvent.values[1];
                 rollAngle = sensorEvent.values[2];
 
-                Log.d(TAG, "Heading: " + String.valueOf(headingAngle));
+                /*Log.d(TAG, "Heading: " + String.valueOf(headingAngle));
                 Log.d(TAG, "Pitch: " + String.valueOf(pitchAngle));
-                Log.d(TAG, "Roll: " + String.valueOf(rollAngle));
+                Log.d(TAG, "Roll: " + String.valueOf(rollAngle));*/
 
                 headingValue.setText(String.valueOf(headingAngle));
                 pitchValue.setText(String.valueOf(pitchAngle));
@@ -136,9 +145,9 @@ public class AR2Activity extends Activity
                 yAxis = sensorEvent.values[1];
                 zAxis = sensorEvent.values[2];
 
-                Log.d(TAG, "X Axis: " + String.valueOf(xAxis));
+                /*Log.d(TAG, "X Axis: " + String.valueOf(xAxis));
                 Log.d(TAG, "Y Axis: " + String.valueOf(yAxis));
-                Log.d(TAG, "Z Axis: " + String.valueOf(zAxis));
+                Log.d(TAG, "Z Axis: " + String.valueOf(zAxis));*/
 
                 xAxisValue.setText(String.valueOf(xAxis));
                 yAxisValue.setText(String.valueOf(yAxis));
@@ -155,7 +164,14 @@ public class AR2Activity extends Activity
     {
         super.onResume();
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 2, locationListener);
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 2, locationListener);
+        }   
+        else
+        {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 0, locationListener);
+        }
 
         sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(orientationSensor), SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(accelerometerSensor), SensorManager.SENSOR_DELAY_NORMAL);
